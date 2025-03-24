@@ -10,6 +10,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+// Add this function at the top of the component
+const formatDate = (date: Date) => {
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
 export type ProjectIdea = {
   id: string
   title: string
@@ -183,7 +192,13 @@ export function ProjectIdeaTracker() {
 
       <ProjectIdeaFilters filters={filters} setFilters={setFilters} categories={categories} />
 
-      <ProjectIdeaList ideas={filteredIdeas} onUpdate={updateIdea} onDelete={deleteIdea} categories={categories} />
+      <ProjectIdeaList
+        ideas={filteredIdeas}
+        onUpdate={updateIdea}
+        onDelete={deleteIdea}
+        categories={categories}
+        formatDate={formatDate}
+      />
     </div>
   )
 }

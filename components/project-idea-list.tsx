@@ -21,6 +21,15 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+// Add this function at the top of the component
+const formatDate = (date: Date) => {
+  const d = new Date(date)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
 interface ProjectIdeaListProps {
   ideas: ProjectIdea[]
   onUpdate: (idea: ProjectIdea) => void
@@ -119,9 +128,7 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
                 <CardTitle className="text-lg truncate" title={idea.title}>
                   {idea.title}
                 </CardTitle>
-                <CardDescription className="mt-1">
-                  Created on {new Date(idea.createdAt).toLocaleDateString()}
-                </CardDescription>
+                <CardDescription className="mt-1">Created on {formatDate(idea.createdAt)}</CardDescription>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -238,9 +245,7 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">{viewingIdea?.title}</DialogTitle>
-            <DialogDescription>
-              Created on {viewingIdea && new Date(viewingIdea.createdAt).toLocaleDateString()}
-            </DialogDescription>
+            <DialogDescription>Created on {viewingIdea && formatDate(viewingIdea.createdAt)}</DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(80vh-120px)]">
             <div className="space-y-6 py-4 px-1">

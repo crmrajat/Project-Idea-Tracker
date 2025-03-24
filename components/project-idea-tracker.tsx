@@ -5,19 +5,10 @@ import { ProjectIdeaForm } from "./project-idea-form"
 import { ProjectIdeaList } from "./project-idea-list"
 import { ProjectIdeaFilters } from "./project-idea-filters"
 import { Button } from "@/components/ui/button"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, Undo2 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
-
-// Add this function at the top of the component
-const formatDate = (date: Date) => {
-  const d = new Date(date)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
-}
 
 export type ProjectIdea = {
   id: string
@@ -83,8 +74,9 @@ export function ProjectIdeaTracker() {
       setIdeas((prev) => [...prev, newIdea])
       setIsAddDialogOpen(false)
       toast({
-        title: "Success",
-        description: "Project idea added successfully",
+        title: "Idea Added",
+        description: `"${idea.title}" has been added successfully`,
+        variant: "default",
         duration: 3000,
       })
     },
@@ -95,8 +87,9 @@ export function ProjectIdeaTracker() {
     (updatedIdea: ProjectIdea) => {
       setIdeas((prev) => prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea)))
       toast({
-        title: "Success",
-        description: "Project idea updated successfully",
+        title: "Idea Updated",
+        description: `"${updatedIdea.title}" has been updated successfully`,
+        variant: "default",
         duration: 3000,
       })
     },
@@ -108,36 +101,37 @@ export function ProjectIdeaTracker() {
       // Find the idea to delete before removing it
       const deletedIdea = ideas.find((idea) => idea.id === id)
 
+      if (!deletedIdea) return
+
       // Update the state immediately to remove the idea
       setIdeas((prevIdeas) => prevIdeas.filter((idea) => idea.id !== id))
 
       // Show toast with undo option
-      if (deletedIdea) {
-        toast({
-          title: "Idea Deleted",
-          description: `"${deletedIdea.title}" has been deleted`,
-          variant: "default",
-          action: (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Restore the deleted idea
-                setIdeas((prev) => [...prev, deletedIdea])
-                toast({
-                  title: "Restored",
-                  description: `"${deletedIdea.title}" has been restored`,
-                  variant: "default",
-                  duration: 3000,
-                })
-              }}
-            >
-              Undo
-            </Button>
-          ),
-          duration: 5000,
-        })
-      }
+      toast({
+        title: "Idea Deleted",
+        description: `"${deletedIdea.title}" has been deleted`,
+        variant: "destructive",
+        action: (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="bg-white text-red-600 hover:bg-gray-100 hover:text-red-700 border border-white flex items-center gap-1 font-medium"
+            onClick={() => {
+              // Restore the deleted idea
+              setIdeas((prev) => [...prev, deletedIdea])
+              toast({
+                title: "Idea Restored",
+                description: `"${deletedIdea.title}" has been restored`,
+                duration: 3000,
+              })
+            }}
+          >
+            <Undo2 className="h-3.5 w-3.5" />
+            Undo
+          </Button>
+        ),
+        duration: 5000,
+      })
     },
     [ideas, toast],
   )
@@ -172,7 +166,7 @@ export function ProjectIdeaTracker() {
       </div>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Add New Project Idea</DialogTitle>
             <DialogDescription>Create a new project idea with details and categorization.</DialogDescription>
@@ -192,13 +186,7 @@ export function ProjectIdeaTracker() {
 
       <ProjectIdeaFilters filters={filters} setFilters={setFilters} categories={categories} />
 
-      <ProjectIdeaList
-        ideas={filteredIdeas}
-        onUpdate={updateIdea}
-        onDelete={deleteIdea}
-        categories={categories}
-        formatDate={formatDate}
-      />
+      <ProjectIdeaList ideas={filteredIdeas} onUpdate={updateIdea} onDelete={deleteIdea} categories={categories} />
     </div>
   )
 }

@@ -63,7 +63,7 @@ export function ProjectIdeaFilters({ filters, setFilters, categories }: ProjectI
 
   return (
     <div className="bg-card border rounded-lg p-4 space-y-4 transition-all hover:shadow-sm">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-medium flex items-center">
           <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
           Filters
@@ -82,7 +82,7 @@ export function ProjectIdeaFilters({ filters, setFilters, categories }: ProjectI
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
         <div className="space-y-2">
           <Label htmlFor="search">Search</Label>
           <div className="relative">

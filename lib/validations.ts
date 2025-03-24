@@ -16,7 +16,12 @@ export const projectIdeaSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"], {
     required_error: "Please select a priority level",
   }),
-  category: z.string().optional().or(z.literal("")),
+  category: z
+    .string()
+    .min(1, { message: "Category is required" })
+    .refine((val) => val.trim().length > 0, {
+      message: "Category cannot be empty",
+    }),
   status: z.enum(["Pending", "Active", "Completed"], {
     required_error: "Please select a status",
   }),

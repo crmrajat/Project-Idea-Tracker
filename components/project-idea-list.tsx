@@ -5,10 +5,9 @@ import type { ProjectIdea } from "./project-idea-tracker"
 import { ProjectIdeaForm } from "./project-idea-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Eye, MoreVertical, Trash2, ClipboardList } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Edit, Trash2, ClipboardList, Calendar } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,14 +19,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 
-// Add this function at the top of the component
+// Format date consistently
 const formatDate = (date: Date) => {
   const d = new Date(date)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }
+  return new Intl.DateTimeFormat("en-US", options).format(d)
 }
 
 interface ProjectIdeaListProps {
@@ -93,6 +95,32 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
     }
   }
 
+  const getPriorityDot = (priority: string) => {
+    switch (priority) {
+      case "High":
+        return "bg-red-500"
+      case "Medium":
+        return "bg-yellow-500"
+      case "Low":
+        return "bg-green-500"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
+  const getStatusDot = (status: string) => {
+    switch (status) {
+      case "Active":
+        return "bg-blue-500"
+      case "Completed":
+        return "bg-green-500"
+      case "Pending":
+        return "bg-orange-500"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
   if (ideas.length === 0) {
     return (
       <div className="text-center py-16 px-4 border rounded-lg bg-card">
@@ -110,55 +138,54 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {ideas.map((idea) => (
         <Card
           key={idea.id}
-          className="flex flex-col h-[320px] transition-all duration-200 hover:shadow-md hover:border-primary/50 focus-within:ring-2 focus-within:ring-primary/50 focus-within:ring-offset-2 overflow-hidden"
+          className="flex flex-col h-auto min-h-[320px] transition-all duration-200 hover:shadow-md hover:border-primary/50 focus-within:ring-2 focus-within:ring-primary/50 focus-within:ring-offset-2 overflow-hidden cursor-pointer"
           tabIndex={0}
+          onClick={() => setViewingIdea(idea)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
               setViewingIdea(idea)
             }
           }}
         >
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 relative">
             <div className="flex justify-between items-start">
-              <div className="overflow-hidden">
+              <div className="overflow-hidden pr-16">
                 <CardTitle className="text-lg truncate" title={idea.title}>
                   {idea.title}
                 </CardTitle>
                 <CardDescription className="mt-1">Created on {formatDate(idea.createdAt)}</CardDescription>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 flex-shrink-0 hover:bg-muted transition-colors"
-                    aria-label="Open menu for this project idea"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setViewingIdea(idea)} className="cursor-pointer focus:bg-muted">
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleEdit(idea)} className="cursor-pointer focus:bg-muted">
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setDeleteConfirmId(idea.id)}
-                    className="text-red-600 focus:text-red-600 cursor-pointer focus:bg-red-50"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="absolute top-4 right-4 flex space-x-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 flex-shrink-0 hover:bg-muted transition-colors rounded-full"
+                  aria-label={`Edit ${idea.title}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEdit(idea)
+                  }}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 flex-shrink-0 hover:bg-red-100 hover:text-red-600 transition-colors rounded-full"
+                  aria-label={`Delete ${idea.title}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setDeleteConfirmId(idea.id)
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="flex-grow overflow-hidden">
@@ -196,10 +223,9 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
       ))}
 
       <Dialog open={!!editingIdea} onOpenChange={(open) => !open && setEditingIdea(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Edit Project Idea</DialogTitle>
-            <DialogDescription>Make changes to your project idea details.</DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(80vh-120px)]">
             <div className="p-1">
@@ -242,119 +268,90 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
       </AlertDialog>
 
       <Dialog open={!!viewingIdea} onOpenChange={(open) => !open && setViewingIdea(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">{viewingIdea?.title}</DialogTitle>
-            <DialogDescription>Created on {viewingIdea && formatDate(viewingIdea.createdAt)}</DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="max-h-[calc(80vh-120px)]">
-            <div className="space-y-6 py-4 px-1">
-              <div className="space-y-2">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 gap-0">
+          {viewingIdea && (
+            <>
+              <div className="p-6 pb-0">
                 <div className="flex items-center">
-                  <div className="h-4 w-1 bg-primary rounded-full mr-2"></div>
-                  <h3 className="text-sm font-medium">Description</h3>
+                  <h2 className="text-2xl font-semibold tracking-tight">{viewingIdea.title}</h2>
                 </div>
-                <div className="bg-card border rounded-lg p-4 shadow-sm transition-all hover:shadow-md">
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {viewingIdea?.description || "No description provided"}
-                  </p>
+
+                <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 mr-1" />
+                  Created on {formatDate(viewingIdea.createdAt)}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <div className="h-4 w-1 bg-primary rounded-full mr-2"></div>
-                  <h3 className="text-sm font-medium">Details</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="bg-card border rounded-lg p-4 shadow-sm transition-all hover:shadow-md flex items-center space-x-3">
-                    <div
-                      className={`w-2 h-2 rounded-full ${viewingIdea?.priority === "High" ? "bg-red-500" : viewingIdea?.priority === "Medium" ? "bg-yellow-500" : "bg-green-500"}`}
-                      aria-hidden="true"
-                    ></div>
-                    <span className="text-sm font-medium">Priority:</span>
-                    <span className="text-sm text-muted-foreground">{viewingIdea?.priority}</span>
+              <ScrollArea className="max-h-[calc(80vh-120px)] px-6">
+                <div className="py-4 space-y-6">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                      Description
+                    </h3>
+                    <p className="text-base leading-relaxed">{viewingIdea.description || "No description provided"}</p>
                   </div>
-                  <div className="bg-card border rounded-lg p-4 shadow-sm transition-all hover:shadow-md flex items-center space-x-3">
-                    <div
-                      className={`w-2 h-2 rounded-full ${viewingIdea?.status === "Active" ? "bg-blue-500" : viewingIdea?.status === "Completed" ? "bg-green-500" : "bg-orange-500"}`}
-                      aria-hidden="true"
-                    ></div>
-                    <span className="text-sm font-medium">Status:</span>
-                    <span className="text-sm text-muted-foreground">{viewingIdea?.status}</span>
-                  </div>
-                  <div className="bg-card border rounded-lg p-4 shadow-sm transition-all hover:shadow-md flex items-center space-x-3 col-span-full">
-                    <div className="w-2 h-2 rounded-full bg-purple-500" aria-hidden="true"></div>
-                    <span className="text-sm font-medium">Category:</span>
-                    <span className="text-sm text-muted-foreground">{viewingIdea?.category || "Uncategorized"}</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <div className="h-4 w-1 bg-primary rounded-full mr-2"></div>
-                  <h3 className="text-sm font-medium">Notes</h3>
-                </div>
-                <div className="bg-card border rounded-lg p-4 shadow-sm transition-all hover:shadow-md">
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {viewingIdea?.notes || "No notes added"}
-                  </p>
-                </div>
-              </div>
+                  <Separator />
 
-              <div className="pt-2">
-                <div className="text-xs text-muted-foreground mb-2 font-medium">Tags</div>
-                <div className="flex flex-wrap gap-2">
-                  {viewingIdea && (
-                    <>
-                      <Badge
-                        variant="outline"
-                        className={`${getPriorityColor(viewingIdea.priority)} shadow-sm transition-all hover:shadow-md`}
-                      >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                        Details
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center">
+                          <div className={`w-2 h-2 rounded-full ${getPriorityDot(viewingIdea.priority)} mr-2`} />
+                          <span className="font-medium mr-2">Priority:</span>
+                          <span className="text-muted-foreground">{viewingIdea.priority}</span>
+                        </div>
+
+                        <div className="flex items-center">
+                          <div className={`w-2 h-2 rounded-full ${getStatusDot(viewingIdea.status)} mr-2`} />
+                          <span className="font-medium mr-2">Status:</span>
+                          <span className="text-muted-foreground">{viewingIdea.status}</span>
+                        </div>
+
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-purple-500 mr-2" />
+                          <span className="font-medium mr-2">Category:</span>
+                          <span className="text-muted-foreground">{viewingIdea.category || "Uncategorized"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Notes</h3>
+                      <p className="text-muted-foreground whitespace-pre-wrap">
+                        {viewingIdea.notes || "No notes added"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className={getPriorityColor(viewingIdea.priority)}>
                         {viewingIdea.priority} Priority
                       </Badge>
-                      <Badge
-                        variant="outline"
-                        className={`${getStatusColor(viewingIdea.status)} shadow-sm transition-all hover:shadow-md`}
-                      >
+                      <Badge variant="outline" className={getStatusColor(viewingIdea.status)}>
                         {viewingIdea.status}
                       </Badge>
                       {viewingIdea.category && (
                         <Badge
                           variant="outline"
-                          className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 shadow-sm transition-all hover:shadow-md"
+                          className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
                         >
                           {viewingIdea.category}
                         </Badge>
                       )}
-                    </>
-                  )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </ScrollArea>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              className="transition-all hover:bg-muted"
-              onClick={() => {
-                if (viewingIdea) {
-                  setViewingIdea(null)
-                  handleEdit(viewingIdea)
-                }
-              }}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-            <Button
-              className="transition-all hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
-              onClick={() => setViewingIdea(null)}
-            >
-              Close
-            </Button>
-          </div>
+              </ScrollArea>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

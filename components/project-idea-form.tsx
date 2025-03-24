@@ -59,10 +59,9 @@ export function ProjectIdeaForm({
         finalCategory = newCategory.trim()
       }
 
-      // If category is empty string, set it to null or undefined
       const submissionData = {
         ...values,
-        category: finalCategory && finalCategory.trim() !== "" ? finalCategory : undefined,
+        category: finalCategory,
       }
 
       onSubmit(submissionData)
@@ -159,7 +158,7 @@ export function ProjectIdeaForm({
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Category *</FormLabel>
                 {!showNewCategoryInput ? (
                   <Select
                     onValueChange={(value) => {
@@ -197,6 +196,7 @@ export function ProjectIdeaForm({
                       }}
                       placeholder="Enter new category"
                       aria-label="New category name"
+                      aria-required="true"
                     />
                     <Button
                       type="button"

@@ -1,5 +1,7 @@
 "use client"
 
+import { AlertDialogTitle } from "@/components/ui/alert-dialog"
+
 import { useState, useCallback } from "react"
 import type { ProjectIdea } from "./project-idea-tracker"
 import { ProjectIdeaForm } from "./project-idea-form"
@@ -16,7 +18,6 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -271,16 +272,13 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 gap-0">
           {viewingIdea && (
             <>
-              <div className="p-6 pb-0">
-                <div className="flex items-center">
-                  <h2 className="text-2xl font-semibold tracking-tight">{viewingIdea.title}</h2>
-                </div>
-
+              <DialogHeader className="p-6 pb-0">
+                <DialogTitle className="text-2xl font-semibold tracking-tight">{viewingIdea.title}</DialogTitle>
                 <div className="flex items-center mt-2 text-sm text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5 mr-1" />
                   Created on {formatDate(viewingIdea.createdAt)}
                 </div>
-              </div>
+              </DialogHeader>
 
               <ScrollArea className="max-h-[calc(80vh-120px)] px-6">
                 <div className="py-4 space-y-6">

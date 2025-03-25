@@ -5,9 +5,9 @@ import { ProjectIdeaForm } from "./project-idea-form"
 import { ProjectIdeaList } from "./project-idea-list"
 import { ProjectIdeaFilters } from "./project-idea-filters"
 import { Button } from "@/components/ui/button"
-import { PlusCircle, Undo2 } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
+import { useSonnerToast } from "@/hooks/use-sonner-toast"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 export type ProjectIdea = {
@@ -55,7 +55,7 @@ export function ProjectIdeaTracker() {
     },
   ])
 
-  const { toast } = useToast()
+  const { success, error, undo } = useSonnerToast()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [filters, setFilters] = useState({
     priority: "",
@@ -73,27 +73,23 @@ export function ProjectIdeaTracker() {
       }
       setIdeas((prev) => [...prev, newIdea])
       setIsAddDialogOpen(false)
-      toast({
+      success({
         title: "Idea Added",
         description: `"${idea.title}" has been added successfully`,
-        variant: "default",
-        duration: 3000,
       })
     },
-    [toast],
+    [success],
   )
 
   const updateIdea = useCallback(
     (updatedIdea: ProjectIdea) => {
       setIdeas((prev) => prev.map((idea) => (idea.id === updatedIdea.id ? updatedIdea : idea)))
-      toast({
+      success({
         title: "Idea Updated",
         description: `"${updatedIdea.title}" has been updated successfully`,
-        variant: "default",
-        duration: 3000,
       })
     },
-    [toast],
+    [success],
   )
 
   const deleteIdea = useCallback(
@@ -107,33 +103,23 @@ export function ProjectIdeaTracker() {
       setIdeas((prevIdeas) => prevIdeas.filter((idea) => idea.id !== id))
 
       // Show toast with undo option
-      toast({
+      undo({
         title: "Idea Deleted",
         description: `"${deletedIdea.title}" has been deleted`,
-        variant: "destructive",
-        action: (
-          <Button
-            variant="secondary"
-            size="sm"
-            className="bg-white text-red-600 hover:bg-gray-100 hover:text-red-700 border border-white flex items-center gap-1 font-medium"
-            onClick={() => {
-              // Restore the deleted idea
-              setIdeas((prev) => [...prev, deletedIdea])
-              toast({
-                title: "Idea Restored",
-                description: `"${deletedIdea.title}" has been restored`,
-                duration: 3000,
-              })
-            }}
-          >
-            <Undo2 className="h-3.5 w-3.5" />
-            Undo
-          </Button>
-        ),
-        duration: 5000,
+        onUndo: () => {
+          // Restore the deleted idea
+          setIdeas((prev) => [...prev, deletedIdea])
+
+          // Show a brief confirmation toast
+          success({
+            title: "Idea Restored",
+            description: `"${deletedIdea.title}" has been restored`,
+            duration: 2000, // 2 seconds
+          })
+        },
       })
     },
-    [ideas, toast],
+    [ideas, undo, success],
   )
 
   const filteredIdeas = ideas.filter((idea) => {

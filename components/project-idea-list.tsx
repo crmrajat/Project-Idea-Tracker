@@ -1,14 +1,12 @@
 "use client"
 
-import { AlertDialogTitle } from "@/components/ui/alert-dialog"
-
 import { useState, useCallback } from "react"
 import type { ProjectIdea } from "./project-idea-tracker"
 import { ProjectIdeaForm } from "./project-idea-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Trash2, ClipboardList, Calendar } from "lucide-react"
+import { Edit, Trash2, ClipboardList, Calendar, FilterX } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -18,6 +16,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -38,9 +37,20 @@ interface ProjectIdeaListProps {
   onUpdate: (idea: ProjectIdea) => void
   onDelete: (id: string) => void
   categories: string[]
+  hasActiveFilters: boolean
+  resetFilters: () => void
+  totalIdeas: number
 }
 
-export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: ProjectIdeaListProps) {
+export function ProjectIdeaList({
+  ideas,
+  onUpdate,
+  onDelete,
+  categories,
+  hasActiveFilters,
+  resetFilters,
+  totalIdeas,
+}: ProjectIdeaListProps) {
   const [editingIdea, setEditingIdea] = useState<ProjectIdea | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [viewingIdea, setViewingIdea] = useState<ProjectIdea | null>(null)
@@ -123,19 +133,40 @@ export function ProjectIdeaList({ ideas, onUpdate, onDelete, categories }: Proje
   }
 
   if (ideas.length === 0) {
-    return (
-      <div className="text-center py-16 px-4 border rounded-lg bg-card">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="bg-muted rounded-full p-4">
-            <ClipboardList className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+    if (totalIdeas === 0) {
+      // No ideas at all
+      return (
+        <div className="text-center py-16 px-4 border rounded-lg bg-card">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="bg-muted rounded-full p-4">
+              <ClipboardList className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+            </div>
+            <h3 className="text-xl font-semibold">No project ideas found</h3>
+            <p className="text-muted-foreground max-w-md">
+              You haven't added any project ideas yet. Click the "Add New Idea" button to get started.
+            </p>
           </div>
-          <h3 className="text-xl font-semibold">No project ideas found</h3>
-          <p className="text-muted-foreground max-w-md">
-            You haven't added any project ideas yet. Click the "Add New Idea" button to get started.
-          </p>
         </div>
-      </div>
-    )
+      )
+    } else {
+      // Has ideas but filters don't match
+      return (
+        <div className="text-center py-16 px-4 border rounded-lg bg-card">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="bg-muted rounded-full p-4">
+              <FilterX className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+            </div>
+            <h3 className="text-xl font-semibold">No matching ideas found</h3>
+            <p className="text-muted-foreground max-w-md">
+              Your current filters don't match any project ideas. Try adjusting your filters to see more results.
+            </p>
+            <Button onClick={resetFilters} variant="outline" className="mt-2">
+              Clear Filters
+            </Button>
+          </div>
+        </div>
+      )
+    }
   }
 
   return (

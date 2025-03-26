@@ -8,7 +8,7 @@ export function SonnerProvider() {
 
   return (
     <SonnerToaster
-      position="bottom-right"
+      position="top-right"
       theme={theme as "light" | "dark" | "system"}
       className="toaster-container"
       toastOptions={{

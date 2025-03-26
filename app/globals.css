@@ -119,10 +119,10 @@ body {
 }
 
 .toast-error {
-  @apply border-red-500 bg-red-50 dark:bg-red-950/50;
+  @apply border-green-500 bg-green-50 dark:bg-green-950/50;
 }
 
 .toast-info {
-  @apply border-blue-500 bg-blue-50 dark:bg-blue-950/50;
+  @apply border-green-500 bg-green-50 dark:bg-green-950/50;
 }
 

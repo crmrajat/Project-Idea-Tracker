@@ -15,7 +15,7 @@ type ToastOptions = {
 
 export function useSonnerToast() {
   const showToast = ({ title, description, duration = 5000, action }: ToastOptions) => {
-    return toast(title, {
+    return toast.success(title, {
       description,
       duration,
       action: action

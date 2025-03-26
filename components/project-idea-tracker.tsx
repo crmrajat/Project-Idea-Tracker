@@ -137,13 +137,25 @@ export function ProjectIdeaTracker() {
     new Set(ideas.map((idea) => idea.category).filter((category) => category && category.trim() !== "")),
   )
 
+  const hasActiveFilters =
+    filters.priority !== "" || filters.category !== "" || filters.status !== "" || filters.searchTerm !== ""
+
+  const resetFilters = useCallback(() => {
+    setFilters({
+      priority: "",
+      category: "",
+      status: "",
+      searchTerm: "",
+    })
+  }, [])
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-semibold">Your Project Ideas</h2>
         <Button
           onClick={() => setIsAddDialogOpen(true)}
-          className="transition-colors hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+          className="w-full sm:w-auto transition-colors hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
           aria-label="Add new project idea"
         >
           <PlusCircle className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -172,7 +184,15 @@ export function ProjectIdeaTracker() {
 
       <ProjectIdeaFilters filters={filters} setFilters={setFilters} categories={categories} />
 
-      <ProjectIdeaList ideas={filteredIdeas} onUpdate={updateIdea} onDelete={deleteIdea} categories={categories} />
+      <ProjectIdeaList
+        ideas={filteredIdeas}
+        onUpdate={updateIdea}
+        onDelete={deleteIdea}
+        categories={categories}
+        hasActiveFilters={hasActiveFilters}
+        resetFilters={resetFilters}
+        totalIdeas={ideas.length}
+      />
     </div>
   )
 }

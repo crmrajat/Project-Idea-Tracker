@@ -68,18 +68,20 @@ export function ProjectIdeaFilters({ filters, setFilters, categories }: ProjectI
           <Filter className="mr-2 h-4 w-4" aria-hidden="true" />
           Filters
         </h3>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={resetFilters}
-            className="transition-all hover:bg-muted focus:ring-2 focus:ring-muted focus:ring-offset-1"
-            aria-label="Clear all filters"
-          >
-            <X className="mr-2 h-4 w-4" />
-            Clear filters
-          </Button>
-        )}
+        <div className="h-8">
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              className="transition-all hover:bg-muted focus:ring-2 focus:ring-muted focus:ring-offset-1"
+              aria-label="Clear all filters"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Clear filters
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
